@@ -8,7 +8,6 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentContainerView"
-        android:name="ca.senecacollege.dps924.assignment4_forexapp.ExchangeFragment"
         android:layout_width="match_parent"
         android:layout_height="629dp"
         app:layout_constraintBottom_toTopOf="@+id/navigation"

@@ -3,4 +3,6 @@
     <string name="home">Exchange</string>
     <string name="history">History</string>
     <string name="news">News</string>
+    <string name="exchange_frag_to">To</string>
+    <string name="exchange">Exchange</string>
 </resources>
