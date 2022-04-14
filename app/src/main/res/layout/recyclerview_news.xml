@@ -20,12 +20,12 @@
         android:id="@+id/article_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Article Title"
+        android:text="@string/article_title"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.04"
-        android:gravity="right"/>
+        android:gravity="center"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

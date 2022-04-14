@@ -25,7 +25,6 @@ public class NewsFragment extends Fragment implements NetworkingService.NewsNetw
 
     TextView articleTitle;
 
-    ArrayList<NewsArticle> articles;
     NewsAdapter adapter;
     RecyclerView newsArticles;
 
@@ -40,11 +39,11 @@ public class NewsFragment extends Fragment implements NetworkingService.NewsNetw
                              @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.news_fragment, container, false);
         articleTitle = v.findViewById(R.id.article_title);
-        articles = ((MyApp)getActivity().getApplication()).getDataManager().articles;
         newsArticles = v.findViewById(R.id.recycler_article);
         newsArticles.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new NewsAdapter(getContext(), articles);
-        newsArticles.setAdapter(adapter);
+        this.networkingService = ((MyApp)getActivity().getApplication()).getNetworkingService();
+        this.JsonService = ((MyApp)getActivity().getApplication()).getJsonService();
+        this.dataManager = ((MyApp)getActivity().getApplication()).getDataManager();
         return v;
     }
 
@@ -52,18 +51,13 @@ public class NewsFragment extends Fragment implements NetworkingService.NewsNetw
     public void onStart() {
         super.onStart();
 
-        this.networkingService = ((MyApp)getActivity().getApplication()).getNetworkingService();
-        this.JsonService = ((MyApp)getActivity().getApplication()).getJsonService();
-        this.dataManager = ((MyApp)getActivity().getApplication()).getDataManager();
-
         if (dataManager.articles.size() == 0) {
             networkingService.getNews();
-
         }
-        adapter.notifyDataSetChanged();
 
         this.networkingService.newsListener = this;
-
+        adapter = new NewsAdapter(getContext(), this.dataManager.articles);
+        newsArticles.setAdapter(adapter);
     }
 
     @Override
@@ -75,7 +69,9 @@ public class NewsFragment extends Fragment implements NetworkingService.NewsNetw
             networkingService.getArticleImage(article.imageUrl, i);
             i++;
         }
-        adapter.notifyDataSetChanged();
+        adapter = new NewsAdapter(getContext(), this.dataManager.articles);
+        newsArticles.setAdapter(adapter);
+
     }
 
     @Override
@@ -84,6 +80,9 @@ public class NewsFragment extends Fragment implements NetworkingService.NewsNetw
             Log.e("image", image.toString());
             dataManager.articles.get(index).image = image;
         }
-        adapter.notifyDataSetChanged();
+
+        adapter = new NewsAdapter(getContext(), this.dataManager.articles);
+        newsArticles.setAdapter(adapter);
+
     }
 }

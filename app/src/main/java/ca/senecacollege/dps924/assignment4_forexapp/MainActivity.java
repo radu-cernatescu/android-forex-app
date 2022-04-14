@@ -41,6 +41,12 @@ NewsAdapter.ArticleClickListener{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        if (savedInstanceState != null) {
+            Log.e("Run", "Again");
+            
+        }
+
         this.networkingService = ((MyApp)getApplication()).getNetworkingService();
         this.JsonService = ((MyApp)getApplication()).getJsonService();
 
@@ -54,6 +60,7 @@ NewsAdapter.ArticleClickListener{
         bottomNav.setOnItemSelectedListener(this);
 
         exchangeFragment = new ExchangeFragment();
+        newsFragment = new NewsFragment();
 
         fm.beginTransaction().setCustomAnimations(R.anim.slide_in, R.anim.slide_out).replace(R.id.fragmentContainerView, this.exchangeFragment).commit();
     }
@@ -67,13 +74,7 @@ NewsAdapter.ArticleClickListener{
                 Log.e("Clicked", "Exchange");
                 if (!item.isChecked()) {
                     item.setChecked(true);
-                    Bundle bundle = new Bundle();
-                    ArrayList<String> short_form = new ArrayList<>();
-                    ArrayList<String> long_form = new ArrayList<>();
 
-                    bundle.putStringArrayList("short_form", short_form);
-                    bundle.putStringArrayList("long_form", long_form);
-                    this.exchangeFragment.setArguments(bundle);
 
                     fm.beginTransaction().setCustomAnimations(R.anim.slide_in, R.anim.slide_out).replace(R.id.fragmentContainerView, this.exchangeFragment).commit();
                 }
@@ -91,7 +92,6 @@ NewsAdapter.ArticleClickListener{
                 Log.e("Clicked", "News");
                 if (!item.isChecked()) {
                     item.setChecked(true);
-                    newsFragment = new NewsFragment();
                     fm.beginTransaction().setCustomAnimations(R.anim.slide_in, R.anim.slide_out).replace(R.id.fragmentContainerView, this.newsFragment).commit();
                 }
                 break;

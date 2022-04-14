@@ -31,7 +31,6 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
         NewsArticle article = articles.get(position);
         holder.articleTitle.setText(article.title);
         holder.article_image.setImageBitmap(article.image);
-
     }
 
     @Override

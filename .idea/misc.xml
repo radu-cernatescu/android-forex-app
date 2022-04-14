@@ -9,10 +9,12 @@
         <entry key="app/src/main/res/drawable/history.xml" value="0.2285" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.1865" />
         <entry key="app/src/main/res/drawable/news.xml" value="0.1865" />
+        <entry key="app/src/main/res/layout-land/activity_main.xml" value="0.15388007054673722" />
+        <entry key="app/src/main/res/layout-land/exchange_fragment.xml" value="1.0" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.2" />
         <entry key="app/src/main/res/layout/exchange_fragment.xml" value="0.22" />
         <entry key="app/src/main/res/layout/history_fragment.xml" value="0.178125" />
-        <entry key="app/src/main/res/layout/news_fragment.xml" value="0.178125" />
+        <entry key="app/src/main/res/layout/news_fragment.xml" value="0.33" />
         <entry key="app/src/main/res/layout/recyclerview_news.xml" value="0.33" />
         <entry key="app/src/main/res/layout/recyclerview_recent.xml" value="0.5543905635648755" />
         <entry key="app/src/main/res/menu/menu.xml" value="0.35104166666666664" />
