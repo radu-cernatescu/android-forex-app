@@ -4,11 +4,11 @@ import android.app.Application;
 
 public class MyApp extends Application {
 
+    public static DataManager dataManager = new DataManager();
     private NetworkingService networkingService = new NetworkingService();
-
     private JsonService JsonService = new JsonService();
 
     public NetworkingService getNetworkingService(){return networkingService;}
-
     public JsonService getJsonService() {return JsonService;}
+    public DataManager getDataManager() {return dataManager;}
 }

@@ -16,7 +16,6 @@ public class HistoryFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.history_fragment, container, false);
-
         return v;
     }
 }

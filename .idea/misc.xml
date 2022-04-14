@@ -13,6 +13,8 @@
         <entry key="app/src/main/res/layout/exchange_fragment.xml" value="0.22" />
         <entry key="app/src/main/res/layout/history_fragment.xml" value="0.178125" />
         <entry key="app/src/main/res/layout/news_fragment.xml" value="0.178125" />
+        <entry key="app/src/main/res/layout/recyclerview_news.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/recyclerview_recent.xml" value="0.5543905635648755" />
         <entry key="app/src/main/res/menu/menu.xml" value="0.35104166666666664" />
       </map>
     </option>

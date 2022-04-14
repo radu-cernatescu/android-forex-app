@@ -23,7 +23,8 @@ import com.google.android.material.navigation.NavigationBarView;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 
-public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener, NetworkingService.NetworkingListener {
+public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener, RecentConversionsAdapter.saveClickListener,
+NewsAdapter.ArticleClickListener{
 
     BottomNavigationView bottomNav;
     BottomNavigationItemView exchangeNavItem;
@@ -38,15 +39,10 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     NetworkingService networkingService;
     JsonService JsonService;
 
-    ArrayList<Currency> currencies;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        currencies = new ArrayList<>();
         this.networkingService = ((MyApp)getApplication()).getNetworkingService();
         this.JsonService = ((MyApp)getApplication()).getJsonService();
-        this.networkingService.listener = this;
-        this.networkingService.getAllCurrencies();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -56,6 +52,10 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         historyNavItem = findViewById(R.id.history);
         newsNavItem = findViewById(R.id.news);
         bottomNav.setOnItemSelectedListener(this);
+
+        exchangeFragment = new ExchangeFragment();
+
+        fm.beginTransaction().setCustomAnimations(R.anim.slide_in, R.anim.slide_out).replace(R.id.fragmentContainerView, this.exchangeFragment).commit();
     }
 
     @SuppressLint("RestrictedApi")
@@ -70,13 +70,11 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                     Bundle bundle = new Bundle();
                     ArrayList<String> short_form = new ArrayList<>();
                     ArrayList<String> long_form = new ArrayList<>();
-                    for (int i = 0; i < currencies.size(); i++) {
-                        short_form.add(currencies.get(i).getShortForm());
-                        long_form.add(currencies.get(i).getLongForm());
-                    }
+
                     bundle.putStringArrayList("short_form", short_form);
                     bundle.putStringArrayList("long_form", long_form);
                     this.exchangeFragment.setArguments(bundle);
+
                     fm.beginTransaction().setCustomAnimations(R.anim.slide_in, R.anim.slide_out).replace(R.id.fragmentContainerView, this.exchangeFragment).commit();
                 }
                 break;
@@ -84,7 +82,8 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                 Log.e("Clicked", "History");
                 if (!item.isChecked()) {
                     item.setChecked(true);
-                    this.historyFragment = new HistoryFragment();
+
+                    historyFragment = new HistoryFragment();
                     fm.beginTransaction().setCustomAnimations(R.anim.slide_in, R.anim.slide_out).replace(R.id.fragmentContainerView, this.historyFragment).commit();
                 }
                 break;
@@ -92,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                 Log.e("Clicked", "News");
                 if (!item.isChecked()) {
                     item.setChecked(true);
-                    this.newsFragment = new NewsFragment();
+                    newsFragment = new NewsFragment();
                     fm.beginTransaction().setCustomAnimations(R.anim.slide_in, R.anim.slide_out).replace(R.id.fragmentContainerView, this.newsFragment).commit();
                 }
                 break;
@@ -101,29 +100,12 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     }
 
     @Override
-    public void currencyDataListener(String JSONstring){
-        this.currencies = JsonService.getCurrenciesFromJSON(JSONstring);
-
-        // render fragment
-        this.exchangeFragment = new ExchangeFragment();
-        Bundle bundle = new Bundle();
-        ArrayList<String> short_form = new ArrayList<>();
-        ArrayList<String> long_form = new ArrayList<>();
-        Log.e("Currencies!", currencies.toString());
-        for (int i = 0; i < currencies.size(); i++) {
-            short_form.add(currencies.get(i).getShortForm());
-            long_form.add(currencies.get(i).getLongForm());
-        }
-        bundle.putStringArrayList("short_form", short_form);
-        bundle.putStringArrayList("long_form", long_form);
-        this.exchangeFragment.setArguments(bundle);
-        fm.beginTransaction().setCustomAnimations(R.anim.slide_in, R.anim.slide_out).replace(R.id.fragmentContainerView, this.exchangeFragment).commit();
-
-        Log.e("Currencies post JSON", this.currencies.toString());
+    public void onSaveClicked() {
+        Log.e("Save Clicked", "Yes");
     }
 
     @Override
-    public void currencyConversionListener(String JSONstring) {
-
+    public void onArticleClicked() {
+        Log.e("Article clicked", "yes");
     }
 }

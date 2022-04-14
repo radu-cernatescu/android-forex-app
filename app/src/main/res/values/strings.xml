@@ -5,4 +5,5 @@
     <string name="news">News</string>
     <string name="exchange_frag_to">To</string>
     <string name="exchange">Exchange</string>
+    <string name="recent_conversions">Recent Conversions</string>
 </resources>
