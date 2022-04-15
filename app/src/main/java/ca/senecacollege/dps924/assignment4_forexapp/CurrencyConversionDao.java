@@ -2,6 +2,7 @@ package ca.senecacollege.dps924.assignment4_forexapp;
 
 import androidx.room.Dao;
 import androidx.room.Delete;
+import androidx.room.DeleteTable;
 import androidx.room.Insert;
 import androidx.room.Query;
 
@@ -13,11 +14,14 @@ import io.reactivex.rxjava3.core.Single;
 @Dao
 public interface CurrencyConversionDao {
     @Insert
-    Completable addConversion(CurrencyConversionResult conversion);
+    void addConversion(CurrencyConversionResult conversion);
 
     @Delete
-    Completable removeConversion(CurrencyConversionResult conversion);
+    void removeConversion(CurrencyConversionResult conversion);
 
     @Query("SELECT * FROM conversions")
     Single<List<CurrencyConversionResult>> getAllConversions();
+
+    @Query("DELETE FROM conversions")
+    void removeAllConversions();
 }

@@ -8,7 +8,11 @@
     <string name="recent_conversions">Recent Conversions</string>
     <string name="article_title">Article Title</string>
     <string name="article_description">Article Description</string>
-
     <string name="no_description">No description available...</string>
     <string name="history_conversion_result">Select currencies above to see result here...</string>
+    <string name="reset_database">Reset Database</string>
+    <string name="quit">Quit</string>
+    <string name="recent_conversions_save_btn_post">SAVED</string>
+    <string name="saved_results">Saved Conversions</string>
+    <string name="recent_conversions_save_btn">Save</string>
 </resources>

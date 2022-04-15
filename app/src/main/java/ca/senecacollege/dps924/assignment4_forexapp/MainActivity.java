@@ -1,27 +1,19 @@
 package ca.senecacollege.dps924.assignment4_forexapp;
 
-import static androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
-
-import java.util.ArrayList;
-import java.util.concurrent.CountDownLatch;
 
 public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
 
@@ -41,16 +33,9 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-            Log.e("Run", "Again");
-        }
-
         this.networkingService = ((MyApp)getApplication()).getNetworkingService();
         this.JsonService = ((MyApp)getApplication()).getJsonService();
         this.dataManager = ((MyApp)getApplication()).getDataManager();
-
-        ((MyApp)getApplication()).initDB();
-        dataManager.currencyDao = dataManager.db.currencyConversionDao();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -78,13 +63,35 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             fm.beginTransaction().setCustomAnimations(R.anim.slide_in, R.anim.slide_out).replace(R.id.fragmentContainerView, this.exchangeFragment).commit();
         }
     }
-    
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.elipse_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.quit:
+                finish();
+                break;
+            case R.id.reset_database:
+                dataManager.dbManager.removeAllConversions();
+                Toast.makeText(this, "Cleared database", Toast.LENGTH_SHORT).show();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
         switch(itemId) {
             case R.id.home:
-                Log.e("Clicked", "Exchange");
+                Log.d("Clicked", "Exchange");
                 this.dataManager.menu_selection = "Exchange";
                 if (!item.isChecked()) {
                     item.setChecked(true);
@@ -93,17 +100,16 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                 }
                 break;
             case R.id.history:
-                Log.e("Clicked", "History");
+                Log.d("Clicked", "History");
                 this.dataManager.menu_selection = "History";
                 if (!item.isChecked()) {
                     item.setChecked(true);
-
                     historyFragment = new HistoryFragment();
                     fm.beginTransaction().setCustomAnimations(R.anim.slide_in, R.anim.slide_out).replace(R.id.fragmentContainerView, this.historyFragment).commit();
                 }
                 break;
             case R.id.news:
-                Log.e("Clicked", "News");
+                Log.d("Clicked", "News");
                 this.dataManager.menu_selection = "News";
                 if (!item.isChecked()) {
                     item.setChecked(true);

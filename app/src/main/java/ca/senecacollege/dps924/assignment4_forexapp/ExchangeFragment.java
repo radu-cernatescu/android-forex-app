@@ -1,6 +1,7 @@
 package ca.senecacollege.dps924.assignment4_forexapp;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,18 +12,21 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 public class ExchangeFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemSelectedListener, NetworkingService.CurrencyNetworkingListener,
-RecentConversionsAdapter.exchangeClickListener{
+RecentConversionsAdapter.exchangeClickListener, DatabaseManager.databaseAddListener{
     Spinner fromSpinner;
     Spinner toSpinner;
     Button exchangeButton;
@@ -35,8 +39,6 @@ RecentConversionsAdapter.exchangeClickListener{
     JsonService JsonService;
     DataManager dataManager;
     ArrayAdapter currencyArrayAdapter;
-    CurrencyConversionDb db;
-    CurrencyConversionDao dao;
 
     ArrayList<String> shortForm;
     ArrayList<String> longForm;
@@ -64,6 +66,7 @@ RecentConversionsAdapter.exchangeClickListener{
         to_amount.setEnabled(false);
         recent = v.findViewById(R.id.recent);
         recent.setLayoutManager(new LinearLayoutManager(getContext()));
+
         adapter = new RecentConversionsAdapter(getContext(), recentConversions);
         adapter.listener = this;
         recent.setAdapter(adapter);
@@ -78,10 +81,11 @@ RecentConversionsAdapter.exchangeClickListener{
         this.networkingService = ((MyApp)getActivity().getApplication()).getNetworkingService();
         this.JsonService = ((MyApp)getActivity().getApplication()).getJsonService();
         this.dataManager = ((MyApp)getActivity().getApplication()).getDataManager();
-        this.db = this.dataManager.db;
-        this.dao = db.currencyConversionDao();
+        this.dataManager.dbManager.getDB(getContext());
 
+        dataManager.dbManager.addListener=this;
         this.networkingService.listener = this;
+
         if (dataManager.currencies.size() == 0) {
             this.networkingService.getAllCurrencies();
         }
@@ -151,27 +155,27 @@ RecentConversionsAdapter.exchangeClickListener{
         currencyArrayAdapter.notifyDataSetChanged();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void currencyConversionListener(String JSONstring, String to, double amountRequested) {
         CurrencyConversion conversion = JsonService.getExchangeRateFromJSON(JSONstring, to);
 
-        Log.e("Conversion", conversion.toString());
-
-        //Log.e("amountRequested", String.valueOf(amountRequested));
         double amountTo = conversion.rate * Double.parseDouble(from_amount.getText().toString());
-        to_amount.setText(String.valueOf(amountTo));
+        DecimalFormat df = new DecimalFormat("0.00");
+        to_amount.setText(df.format(amountTo));
 
-        CurrencyConversionResult result = new CurrencyConversionResult(conversion.base, conversion.destination, amountTo, amountRequested, new Date());
+        CurrencyConversionResult result = new CurrencyConversionResult(conversion.base, conversion.destination, amountTo, amountRequested, new Date().toInstant().toEpochMilli());
         recentConversions.add(result);
         adapter.notifyDataSetChanged();
-        Log.e("Result", result.toString());
     }
 
     @Override
-    public void exchangeClicked(CurrencyConversionResult currencyConversionResult) {
-        Log.e("Clicked here", currencyConversionResult.toString());
+    public void onSaveClicked(CurrencyConversionResult currencyConversionResult) {
+        this.dataManager.dbManager.addConversion(currencyConversionResult);
+    }
 
-
-        this.dao.addConversion(currencyConversionResult);
+    @Override
+    public void onConversionAdded() {
+        Toast.makeText(getContext(), "Saved!", Toast.LENGTH_SHORT).show();
     }
 }

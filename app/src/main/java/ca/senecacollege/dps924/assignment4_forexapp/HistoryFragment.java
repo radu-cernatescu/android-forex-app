@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,18 +30,20 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class HistoryFragment extends Fragment implements AdapterView.OnItemSelectedListener, NetworkingService.CurrencyHistoryListener {
+public class HistoryFragment extends Fragment implements AdapterView.OnItemSelectedListener, NetworkingService.CurrencyHistoryListener,
+ DatabaseManager.DatabaseListener{
     NetworkingService networkingService;
     JsonService JsonService;
     DataManager dataManager;
     ArrayAdapter currencyArrayAdapter;
     List<CurrencyConversionResult> savedConversions;
-    ArrayAdapter savedConversionsAdapter;
+    HistoryAdapter savedConversionsAdapter;
 
     Spinner from;
     Spinner to;
@@ -48,10 +51,7 @@ public class HistoryFragment extends Fragment implements AdapterView.OnItemSelec
     Button exchange;
     TextView conversion_text;
     RecyclerView savedExchanges;
-
-    ExecutorService databaseExecutor =
-            Executors.newFixedThreadPool(4);
-    Handler mainThread_Handler = new Handler(Looper.getMainLooper());
+    ItemTouchHelper itemSwipe;
 
     @Nullable
     @Override
@@ -66,6 +66,7 @@ public class HistoryFragment extends Fragment implements AdapterView.OnItemSelec
         conversion_text = v.findViewById(R.id.history_conversion_result);
         savedExchanges = v.findViewById(R.id.history_saved_result);
         savedExchanges.setLayoutManager(new LinearLayoutManager(getContext()));
+
         datePicker.setMinDate(946720800);
         datePicker.setMaxDate(System.currentTimeMillis());
         return v;
@@ -110,21 +111,29 @@ public class HistoryFragment extends Fragment implements AdapterView.OnItemSelec
             to.setSelection(dataManager.dropDown.indexOf(dataManager.history_to_selection));
         }
 
-        this.networkingService.historyListener = this;
-        databaseExecutor.execute(new Runnable() {
+        itemSwipe = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT) {
             @Override
-            public void run() {
-                savedConversions = dataManager.currencyDao.getAllConversions().blockingGet();
-                mainThread_Handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.e("conversion", String.valueOf(savedConversions.size()));
-                    }
-                });
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                dataManager.dbManager.removeConversion(savedConversions.get(position));
             }
         });
+        itemSwipe.attachToRecyclerView(savedExchanges);
 
+        this.networkingService.historyListener = this;
+        dataManager.dbManager.listener = this;
 
+        if (dataManager.savedConversions.size() == 0) {
+            dataManager.dbManager.getAllConversions();
+        }
+        else {
+            this.savedConversions = dataManager.savedConversions;
+        }
     }
 
     @Override
@@ -142,19 +151,32 @@ public class HistoryFragment extends Fragment implements AdapterView.OnItemSelec
     }
 
     @Override
-    public void onNothingSelected(AdapterView<?> adapterView) {
-
-    }
+    public void onNothingSelected(AdapterView<?> adapterView) {}
 
     @Override
     public void getCurrencyHistory(String JSONstring, String to) {
         try {
             CurrencyConversion conversion = this.JsonService.getConversionFromJSON(JSONstring, to);
 
-            Log.e("hmm", conversion.date.toString());
             conversion_text.setText(conversion.toString());
         } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onListReady(List<CurrencyConversionResult> conversions) {
+        Log.d("onListReady amount", String.valueOf(conversions.size()));
+        this.savedConversions = conversions;
+        savedConversionsAdapter = new HistoryAdapter(getContext(), savedConversions);
+        savedExchanges.setAdapter(savedConversionsAdapter);
+        savedConversionsAdapter.notifyDataSetChanged();
+
+    }
+
+    @Override
+    public void removeConversion(CurrencyConversionResult conversion) {
+        savedConversions.remove(conversion);
+        savedConversionsAdapter.notifyDataSetChanged();
     }
 }

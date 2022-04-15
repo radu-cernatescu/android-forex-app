@@ -12,7 +12,4 @@ public class MyApp extends Application {
     public NetworkingService getNetworkingService(){return networkingService;}
     public JsonService getJsonService() {return JsonService;}
     public DataManager getDataManager() {return dataManager;}
-    public void initDB() {dataManager.db =
-        Room.databaseBuilder(getApplicationContext(),
-               CurrencyConversionDb.class, "currency-conversions").build();}
 }

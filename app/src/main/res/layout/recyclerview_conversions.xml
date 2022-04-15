@@ -7,24 +7,11 @@
     android:id="@+id/recent_layout" >
 
     <TextView
-        android:id="@+id/conversion_result"
-        android:layout_width="323dp"
+        android:id="@+id/history_conversion_result"
+        android:layout_width="match_parent"
         android:layout_height="35dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/save_recent_button"
         app:layout_constraintHorizontal_bias="0.888"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <Button
-        android:id="@+id/save_recent_button"
-        android:layout_width="87dp"
-        android:layout_height="43dp"
-        android:text="@string/recent_conversions_save_btn"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.996"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />

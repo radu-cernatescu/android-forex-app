@@ -8,6 +8,7 @@ import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Entity(tableName = "conversions")
@@ -21,25 +22,21 @@ public class CurrencyConversionResult {
     double toAmountConverted;
     double fromAmountRequested;
 
-    @Ignore
-    Date date; // date of conversion
-
     long date_millis; // date of conversion in millis
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    CurrencyConversionResult(String from, String to, double toAmountConverted, double fromAmountRequested, Date date) {
+    CurrencyConversionResult(String from, String to, double toAmountConverted, double fromAmountRequested, long millis) {
         this.from = from;
         this.to = to;
         this.toAmountConverted = toAmountConverted;
         this.fromAmountRequested = fromAmountRequested;
-        this.date = date;
-        this.date_millis = date.toInstant().getEpochSecond();
+        this.date_millis = millis;
     }
 
     CurrencyConversionResult() {}
 
     public String toString() {
         DecimalFormat df = new DecimalFormat("0.00");
-        return "Conversion Result: " + fromAmountRequested + " " + from + " = " + df.format(toAmountConverted) + " " + to + " converted on " + date.toString();
+        return "Conversion Result: " + fromAmountRequested + " " + from + " = " + df.format(toAmountConverted) + " " + to + " converted on " + new Date(date_millis);
     }
 }
