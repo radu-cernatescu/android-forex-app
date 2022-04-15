@@ -7,4 +7,8 @@
     <string name="exchange">Exchange</string>
     <string name="recent_conversions">Recent Conversions</string>
     <string name="article_title">Article Title</string>
+    <string name="article_description">Article Description</string>
+
+    <string name="no_description">No description available...</string>
+    <string name="history_conversion_result">Select currencies above to see result here...</string>
 </resources>

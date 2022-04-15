@@ -23,8 +23,7 @@ import com.google.android.material.navigation.NavigationBarView;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 
-public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener, RecentConversionsAdapter.saveClickListener,
-NewsAdapter.ArticleClickListener{
+public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
 
     BottomNavigationView bottomNav;
     BottomNavigationItemView exchangeNavItem;
@@ -38,17 +37,20 @@ NewsAdapter.ArticleClickListener{
 
     NetworkingService networkingService;
     JsonService JsonService;
+    DataManager dataManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         if (savedInstanceState != null) {
             Log.e("Run", "Again");
-            
         }
 
         this.networkingService = ((MyApp)getApplication()).getNetworkingService();
         this.JsonService = ((MyApp)getApplication()).getJsonService();
+        this.dataManager = ((MyApp)getApplication()).getDataManager();
+
+        ((MyApp)getApplication()).initDB();
+        dataManager.currencyDao = dataManager.db.currencyConversionDao();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -60,27 +62,39 @@ NewsAdapter.ArticleClickListener{
         bottomNav.setOnItemSelectedListener(this);
 
         exchangeFragment = new ExchangeFragment();
-        newsFragment = new NewsFragment();
 
-        fm.beginTransaction().setCustomAnimations(R.anim.slide_in, R.anim.slide_out).replace(R.id.fragmentContainerView, this.exchangeFragment).commit();
+        if (!this.dataManager.menu_selection.equals("")) {
+            if (this.dataManager.menu_selection.equals("Exchange")) {
+                bottomNav.setSelectedItemId(R.id.home);
+            }
+            else if (this.dataManager.menu_selection.equals("History")) {
+                bottomNav.setSelectedItemId(R.id.history);
+            }
+            else if (this.dataManager.menu_selection.equals("News")) {
+                bottomNav.setSelectedItemId(R.id.news);
+            }
+        }
+        else {
+            fm.beginTransaction().setCustomAnimations(R.anim.slide_in, R.anim.slide_out).replace(R.id.fragmentContainerView, this.exchangeFragment).commit();
+        }
     }
-
-    @SuppressLint("RestrictedApi")
+    
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
         switch(itemId) {
             case R.id.home:
                 Log.e("Clicked", "Exchange");
+                this.dataManager.menu_selection = "Exchange";
                 if (!item.isChecked()) {
                     item.setChecked(true);
-
-
+                    exchangeFragment = new ExchangeFragment();
                     fm.beginTransaction().setCustomAnimations(R.anim.slide_in, R.anim.slide_out).replace(R.id.fragmentContainerView, this.exchangeFragment).commit();
                 }
                 break;
             case R.id.history:
                 Log.e("Clicked", "History");
+                this.dataManager.menu_selection = "History";
                 if (!item.isChecked()) {
                     item.setChecked(true);
 
@@ -90,22 +104,14 @@ NewsAdapter.ArticleClickListener{
                 break;
             case R.id.news:
                 Log.e("Clicked", "News");
+                this.dataManager.menu_selection = "News";
                 if (!item.isChecked()) {
                     item.setChecked(true);
+                    newsFragment = new NewsFragment();
                     fm.beginTransaction().setCustomAnimations(R.anim.slide_in, R.anim.slide_out).replace(R.id.fragmentContainerView, this.newsFragment).commit();
                 }
                 break;
         }
         return false;
-    }
-
-    @Override
-    public void onSaveClicked() {
-        Log.e("Save Clicked", "Yes");
-    }
-
-    @Override
-    public void onArticleClicked() {
-        Log.e("Article clicked", "yes");
     }
 }

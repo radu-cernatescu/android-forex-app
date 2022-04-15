@@ -1,6 +1,9 @@
 package ca.senecacollege.dps924.assignment4_forexapp;
 
+import android.os.Build;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -94,6 +97,23 @@ public class JsonService {
         }
 
         return articles;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public CurrencyConversion getConversionFromJSON(String JSONstring, String to) throws JSONException, ParseException {
+        CurrencyConversion conversion = null;
+
+        JSONObject response_object = new JSONObject(JSONstring);
+
+        JSONObject rates_object = new JSONObject(String.valueOf((JSONObject) response_object.get("rates")));
+        Date date = new SimpleDateFormat("yyyy-MM-dd").parse(response_object.get("date").toString());
+        Log.e("Here", response_object.get("date").toString());
+        Log.e("Conversion", String.valueOf(response_object.get("date")));
+        double rate = Double.parseDouble(String.valueOf(rates_object.get(to)));
+        String from = String.valueOf(response_object.get("base"));
+        conversion = new CurrencyConversion(from, to, date, rate);
+
+        return conversion;
     }
 }
 

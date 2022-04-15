@@ -1,6 +1,8 @@
 package ca.senecacollege.dps924.assignment4_forexapp;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -32,6 +34,8 @@ public class NewsFragment extends Fragment implements NetworkingService.NewsNetw
     JsonService JsonService;
     DataManager dataManager;
 
+    ArrayList<NewsArticle> articles;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -51,38 +55,41 @@ public class NewsFragment extends Fragment implements NetworkingService.NewsNetw
     public void onStart() {
         super.onStart();
 
+        this.articles = new ArrayList<>();
+
         if (dataManager.articles.size() == 0) {
             networkingService.getNews();
         }
+        else {
+            this.articles = this.dataManager.articles;
+        }
 
         this.networkingService.newsListener = this;
-        adapter = new NewsAdapter(getContext(), this.dataManager.articles);
+        adapter = new NewsAdapter(getContext(), this.articles);
         newsArticles.setAdapter(adapter);
     }
 
     @Override
     public void getArticlesListener(String JSONstring) {
-        dataManager.articles = JsonService.getNewsArticleFromJSON(JSONstring);
+        this.dataManager.articles = JsonService.getNewsArticleFromJSON(JSONstring);
 
         int i = 0;
         for (NewsArticle article : dataManager.articles) {
             networkingService.getArticleImage(article.imageUrl, i);
             i++;
-        }
-        adapter = new NewsAdapter(getContext(), this.dataManager.articles);
-        newsArticles.setAdapter(adapter);
+            this.articles.add(article);
 
+        }
+        adapter.notifyDataSetChanged();
     }
+
 
     @Override
     public void setImage(Bitmap image, int index) {
         if (image != null) {
-            Log.e("image", image.toString());
             dataManager.articles.get(index).image = image;
+            this.articles.get(index).image = image;
         }
-
-        adapter = new NewsAdapter(getContext(), this.dataManager.articles);
-        newsArticles.setAdapter(adapter);
-
+        adapter.notifyDataSetChanged();
     }
 }

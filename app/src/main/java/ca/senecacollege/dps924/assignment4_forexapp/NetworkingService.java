@@ -9,6 +9,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
@@ -25,6 +28,8 @@ public class NetworkingService {
     private double from_amount;
     private String from;
     private String to;
+    private String date;
+    Bitmap image;
 
     public static ExecutorService networkExecutorService = Executors.newFixedThreadPool(4);
     public static Handler networkingHandler = new Handler(Looper.getMainLooper());
@@ -42,7 +47,13 @@ public class NetworkingService {
         void setImage(Bitmap image, int index);
     }
 
-    NewsNetworkingListener newsListener;
+    public NewsNetworkingListener newsListener;
+
+    interface CurrencyHistoryListener {
+        void getCurrencyHistory(String JSONstring, String to);
+    }
+
+    public CurrencyHistoryListener historyListener;
 
     public void getAllCurrencies() {
         String urlString = forexURL + "currencies/";
@@ -62,8 +73,17 @@ public class NetworkingService {
         connect(urlString, "news");
     }
 
+    public void historyExchangeCurrency(String from, String to, Date date) {
+
+        String format = new SimpleDateFormat("yyyy-mm-dd").format(date);
+        this.from = from;
+        this.to = to;
+        this.date = format;
+        String urlString = forexURL + format + "?from=" + from + "&to=" + to;
+        connect(urlString, "history");
+    }
+
     public void getArticleImage(String url, int index) {
-        AtomicReference<Bitmap> image = new AtomicReference<>();
         networkExecutorService.execute(() -> {
             InputStream is = null;
 
@@ -71,15 +91,16 @@ public class NetworkingService {
                 if (!url.equals("")) {
                     is = (InputStream) new URL(url).getContent();
 
-                    image.set(BitmapFactory.decodeStream(is));
-                    if (image.get() != null) {
-                        Log.e("Image networking", image.toString());
+                    this.image = BitmapFactory.decodeStream(is);
+
+                    if (this.image != null) {
+                        Log.d("Image networking", image.toString());
                     }
                 }
                 networkingHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        newsListener.setImage(image.get(), index);
+                        newsListener.setImage(image, index);
                     }
                 });
 
@@ -117,7 +138,7 @@ public class NetworkingService {
                     in.close();
                     reader.close();
 
-                    Log.e("JSON", JSONstring);
+                    Log.d("JSON", JSONstring);
 
                     final String finalJSONstring = JSONstring;
                     if (type.equals("get_all")) {
@@ -144,13 +165,21 @@ public class NetworkingService {
                             }
                         });
                     }
+                    else if (type.equals("history")) {
+                        networkingHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                historyListener.getCurrencyHistory(finalJSONstring, to);
+                            }
+                        });
+                    }
 
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
-                    Log.e("JSON", e.toString());
+                    Log.d("JSON", e.toString());
                 } catch (IOException e) {
                     e.printStackTrace();
-                    Log.e("JSON", status[0] + ": " + e.toString());
+                    Log.d("JSON", status[0] + ": " + e.toString());
                 } finally {
                     assert httpsURLConnection != null;
                     httpsURLConnection.disconnect();

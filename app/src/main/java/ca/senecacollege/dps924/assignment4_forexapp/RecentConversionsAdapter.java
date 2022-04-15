@@ -1,30 +1,32 @@
 package ca.senecacollege.dps924.assignment4_forexapp;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.ContentInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
 public class RecentConversionsAdapter extends RecyclerView.Adapter<RecentConversionsAdapter.ExchangeViewHolder> {
 
-    interface saveClickListener {
-        public void onSaveClicked();
+    interface exchangeClickListener{
+        void exchangeClicked(CurrencyConversionResult conversionResult);
     }
-    saveClickListener listener;
+    public exchangeClickListener listener;
     private Context mCtx;
     private ArrayList<CurrencyConversionResult> results;
 
     public RecentConversionsAdapter(Context mCtx, ArrayList<CurrencyConversionResult> results) {
         this.mCtx = mCtx;
         this.results = results;
-        this.listener = (MainActivity) mCtx;
     }
 
     @NonNull
@@ -38,6 +40,12 @@ public class RecentConversionsAdapter extends RecyclerView.Adapter<RecentConvers
     public void onBindViewHolder(@NonNull ExchangeViewHolder holder, int position) {
         CurrencyConversionResult result = results.get(position);
         holder.conversionResult.setText(result.toString());
+        holder.saveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.exchangeClicked(result);
+            }
+        });
     }
 
     @Override
@@ -46,19 +54,14 @@ public class RecentConversionsAdapter extends RecyclerView.Adapter<RecentConvers
     }
 
     class ExchangeViewHolder extends RecyclerView.ViewHolder
-            implements
-            View.OnClickListener
     {
         TextView conversionResult;
+        Button saveBtn;
 
         public ExchangeViewHolder(View itemView) {
             super(itemView);
             conversionResult = itemView.findViewById(R.id.conversion_result);
-            itemView.setOnClickListener(this);
-        }
-        @Override
-        public void onClick(View view) {
-            listener.onSaveClicked();
+            saveBtn = itemView.findViewById(R.id.save_recent_button);
         }
     }
 

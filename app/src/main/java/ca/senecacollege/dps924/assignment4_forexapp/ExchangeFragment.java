@@ -21,7 +21,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class ExchangeFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemSelectedListener, NetworkingService.CurrencyNetworkingListener{
+public class ExchangeFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemSelectedListener, NetworkingService.CurrencyNetworkingListener,
+RecentConversionsAdapter.exchangeClickListener{
     Spinner fromSpinner;
     Spinner toSpinner;
     Button exchangeButton;
@@ -33,6 +34,9 @@ public class ExchangeFragment extends Fragment implements View.OnClickListener, 
     NetworkingService networkingService;
     JsonService JsonService;
     DataManager dataManager;
+    ArrayAdapter currencyArrayAdapter;
+    CurrencyConversionDb db;
+    CurrencyConversionDao dao;
 
     ArrayList<String> shortForm;
     ArrayList<String> longForm;
@@ -61,6 +65,7 @@ public class ExchangeFragment extends Fragment implements View.OnClickListener, 
         recent = v.findViewById(R.id.recent);
         recent.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new RecentConversionsAdapter(getContext(), recentConversions);
+        adapter.listener = this;
         recent.setAdapter(adapter);
 
         return v;
@@ -73,13 +78,15 @@ public class ExchangeFragment extends Fragment implements View.OnClickListener, 
         this.networkingService = ((MyApp)getActivity().getApplication()).getNetworkingService();
         this.JsonService = ((MyApp)getActivity().getApplication()).getJsonService();
         this.dataManager = ((MyApp)getActivity().getApplication()).getDataManager();
+        this.db = this.dataManager.db;
+        this.dao = db.currencyConversionDao();
 
         this.networkingService.listener = this;
         if (dataManager.currencies.size() == 0) {
             this.networkingService.getAllCurrencies();
         }
 
-        ArrayAdapter currencyArrayAdapter = new ArrayAdapter(getContext(), androidx.constraintlayout.widget.R.layout.support_simple_spinner_dropdown_item, dataManager.dropDown);
+        currencyArrayAdapter = new ArrayAdapter(getContext(), androidx.constraintlayout.widget.R.layout.support_simple_spinner_dropdown_item, dataManager.dropDown);
         fromSpinner.setAdapter(currencyArrayAdapter);
         toSpinner.setAdapter(currencyArrayAdapter);
         fromSpinner.setOnItemSelectedListener(this);
@@ -88,6 +95,11 @@ public class ExchangeFragment extends Fragment implements View.OnClickListener, 
 
         from_amount.setText("");
         to_amount.setText("");
+
+        if (!dataManager.from_selection.equals("")) {
+            fromSpinner.setSelection(dataManager.dropDown.indexOf(dataManager.from_selection));
+            toSpinner.setSelection(dataManager.dropDown.indexOf(dataManager.to_selection));
+        }
     }
 
     @Override
@@ -110,6 +122,8 @@ public class ExchangeFragment extends Fragment implements View.OnClickListener, 
             exchangeButton.setClickable(true);
             exchangeButton.setEnabled(true);
         }
+        dataManager.from_selection = fromSpinner.getSelectedItem().toString();
+        dataManager.to_selection = toSpinner.getSelectedItem().toString();
     }
 
     @Override
@@ -134,13 +148,7 @@ public class ExchangeFragment extends Fragment implements View.OnClickListener, 
             }
 
         }
-        try {
-            ArrayAdapter currencyArrayAdapter = new ArrayAdapter(getContext(), androidx.constraintlayout.widget.R.layout.support_simple_spinner_dropdown_item, dataManager.dropDown);
-            fromSpinner.setAdapter(currencyArrayAdapter);
-            toSpinner.setAdapter(currencyArrayAdapter);
-            fromSpinner.setOnItemSelectedListener(this);
-            toSpinner.setOnItemSelectedListener(this);
-        } catch (NullPointerException e) {}
+        currencyArrayAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -159,4 +167,11 @@ public class ExchangeFragment extends Fragment implements View.OnClickListener, 
         Log.e("Result", result.toString());
     }
 
+    @Override
+    public void exchangeClicked(CurrencyConversionResult currencyConversionResult) {
+        Log.e("Clicked here", currencyConversionResult.toString());
+
+
+        this.dao.addConversion(currencyConversionResult);
+    }
 }

@@ -2,8 +2,9 @@ package ca.senecacollege.dps924.assignment4_forexapp;
 
 import android.app.Application;
 
-public class MyApp extends Application {
+import androidx.room.Room;
 
+public class MyApp extends Application {
     public static DataManager dataManager = new DataManager();
     private NetworkingService networkingService = new NetworkingService();
     private JsonService JsonService = new JsonService();
@@ -11,4 +12,7 @@ public class MyApp extends Application {
     public NetworkingService getNetworkingService(){return networkingService;}
     public JsonService getJsonService() {return JsonService;}
     public DataManager getDataManager() {return dataManager;}
+    public void initDB() {dataManager.db =
+        Room.databaseBuilder(getApplicationContext(),
+               CurrencyConversionDb.class, "currency-conversions").build();}
 }
